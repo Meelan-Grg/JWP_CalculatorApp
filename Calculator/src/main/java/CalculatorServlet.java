@@ -38,68 +38,68 @@ public class CalculatorServlet extends HttpServlet {
 		    if (input == null || input.isEmpty()) {
 		       return;
 		    }
-		    String postfix = infixToPostfix(input);
-		    int result = evaluatePostfix(postfix); 
+		    String prefix = infixToPrefix(input);
+		    int result = evaluatePrefix(prefix); 
 		    
 		    request.setAttribute("result", result);
 		    request.getRequestDispatcher("calculator.jsp").forward(request, response);
 	}
-	 private int evaluatePostfix(String postfix) {
-		    Stack<Integer> stack = new Stack<Integer>();
-		    for (int i = 0; i < postfix.length(); i++) {
-		      char c = postfix.charAt(i);
-		      if (Character.isDigit(c)) {
-		        stack.push(c - '0');
-		      } else {
-		        int b = stack.pop();
-		        int a = stack.pop();
-		        int result = 0;
-		        switch (c) {
-		          case '+':
-		            result = a + b;
-		            break;
-		          case '-':
-		            result = a - b;
-		            break;
-		          case '*':
-		            result = a * b;
-		            break;
-		          case '/':
-		            result = a / b;
-		            break;
-		        }
-		        stack.push(result);
-		      }
-		    }
-		    return stack.pop();
-		  }
+	private int evaluatePrefix(String prefix) {
+	    Stack<Integer> stack = new Stack<Integer>();
+	    for (int i = prefix.length() - 1; i >= 0; i--) {
+	      char c = prefix.charAt(i);
+	      if (Character.isDigit(c)) {
+	        stack.push(c - '0');
+	      } else {
+	        int a = stack.pop();
+	        int b = stack.pop();
+	        int result = 0;
+	        switch (c) {
+	          case '+':
+	            result = a + b;
+	            break;
+	          case '-':
+	            result = a - b;
+	            break;
+	          case '*':
+	            result = a * b;
+	            break;
+	          case '/':
+	            result = a / b;
+	            break;
+	        }
+	        stack.push(result);
+	      }
+	    }
+	    return stack.pop();
+	}
 
-		  private String infixToPostfix(String infix) {
-		    StringBuilder postfix = new StringBuilder();
-		    Stack<Character> stack = new Stack<Character>();
-		    for (int i = 0; i < infix.length(); i++) {
-		      char c = infix.charAt(i);
-		      if (Character.isDigit(c)) {
-		        postfix.append(c);
-		      } else if (c == '+' || c == '-' || c == '*' || c == '/') {
-		        while (!stack.isEmpty() && precedence(stack.peek()) >= precedence(c)) {
-		          postfix.append(stack.pop());
-		        }
-		        stack.push(c);
-		      } else if (c == '(') {
-		        stack.push(c);
-		      } else if (c == ')') {
-		        while (!stack.isEmpty() && stack.peek() != '(') {
-		          postfix.append(stack.pop());
-		        }
-		        stack.pop();
-		      }
-		    }
-		    while (!stack.isEmpty()) {
-		      postfix.append(stack.pop());
-		    }
-		    return postfix.toString();
-		  }
+	private String infixToPrefix(String infix) {
+	    StringBuilder prefix = new StringBuilder();
+	    Stack<Character> stack = new Stack<Character>();
+	    for (int i = infix.length() - 1; i >= 0; i--) {
+	      char c = infix.charAt(i);
+	      if (Character.isDigit(c)) {
+	        prefix.append(c);
+	      } else if (c == '+' || c == '-' || c == '*' || c == '/') {
+	        while (!stack.isEmpty() && precedence(stack.peek()) > precedence(c)) {
+	          prefix.append(stack.pop());
+	        }
+	        stack.push(c);
+	      } else if (c == ')') {
+	        stack.push(c);
+	      } else if (c == '(') {
+	        while (!stack.isEmpty() && stack.peek() != ')') {
+	          prefix.append(stack.pop());
+	        }
+	        stack.pop();
+	      }
+	    }
+	    while (!stack.isEmpty()) {
+	      prefix.append(stack.pop());
+	    }
+	    return prefix.reverse().toString();
+	}
 
 		  private int precedence(char operator) {
 		    switch (operator) {
